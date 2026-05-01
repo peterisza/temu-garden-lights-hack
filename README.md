@@ -8,10 +8,8 @@ I bought 12V-24V outdoor garden lights on Temu. The label says:
 - Manufacturer: Shenzhen Changtaiying Technology Co., Ltd
 - Address: No. 4 Yintian Road, Bao'an District, Shenzhen City, Guangdong province, China.
 
-Originally, the lamp had an FMD FT60E122 microcontroller with the following pinout:
+Originally, the lamp had an FMD FT60E122 microcontroller in an SO-14 package with the following pinout:
 
-| SO-14 Pin | Function |
-| :--- | :--- |
 | 1 | VDD |
 | 2 | Crystal1 (16 MHz) |
 | 3 | Crystal2 |
