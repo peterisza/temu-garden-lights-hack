@@ -10,6 +10,8 @@ I bought 12V-24V outdoor garden lights on Temu. The label says:
 
 Originally, the lamp had an FMD FT60E122 microcontroller in an SO-14 package with the following pinout:
 
+| # | Function |
+| :--- | :--- |
 | 1 | VDD |
 | 2 | Crystal1 (16 MHz) |
 | 3 | Crystal2 |
