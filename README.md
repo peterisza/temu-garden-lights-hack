@@ -12,7 +12,7 @@ Originally, the lamp had an FMD FT60E122 microcontroller in an SO-14 package wit
 
 | # | Function |
 | :--- | :--- |
-| 1 | VDD |
+| 1 | VDD (5V) |
 | 2 | Crystal1 (16 MHz) |
 | 3 | Crystal2 |
 | 4 | radio recv |
