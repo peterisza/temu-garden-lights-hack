@@ -1,6 +1,6 @@
 # Temu garden lights hack
 
-I bought 12V-24V outdoor garden lights on Temu. The label says:
+I bought 12V-24V outdoor garden lights on Temu. The label said:
 
 - Product Name: Low Voltage LED Lights
 - Model: CTY-10W
