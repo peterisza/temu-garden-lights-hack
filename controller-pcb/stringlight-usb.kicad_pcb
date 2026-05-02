@@ -10748,6 +10748,18 @@
 		(layer "Edge.Cuts")
 		(uuid "f307ede4-ba9e-45ad-8b69-f026a60ebe94")
 	)
+	(gr_text "enclosure: Euroclamp CEM17-S1-GY"
+		(at 73.75 119 0)
+		(layer "Cmts.User")
+		(uuid "d955bb10-c433-4cf8-a113-a5ea78164fa9")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+			(justify left bottom)
+		)
+	)
 	(segment
 		(start 90.025 126.2)
 		(end 85.6875 126.2)

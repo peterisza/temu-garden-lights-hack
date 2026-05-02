@@ -3976,6 +3976,16 @@
 			(embedded_fonts no)
 		)
 	)
+	(text "enclosure: Euroclamp CEM17-S1-GY"
+		(exclude_from_sim no)
+		(at 43.688 156.21 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "2fe1e83d-60bf-4aba-b0cb-636a8cbfcd0c")
+	)
 	(junction
 		(at 217.17 87.63)
 		(diameter 0)
