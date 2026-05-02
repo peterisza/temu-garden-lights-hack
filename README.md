@@ -11,7 +11,7 @@ Disclaimer: All electrical modifications are performed at your own risk.
 <table border="0">
   <tr>
     <td valign="top">
-      <img src="label.jpg" alt="Product Label" width="300" />
+      <img src="label.jpg" alt="Product Label" width="300" style="min-width: 100px;" />
     </td>
     <td valign="top">
       <ul>
@@ -53,7 +53,7 @@ Originally, the lamp had an FMD FT60E122 microcontroller in an SO-14 package wit
       </table>
     </td>
     <td valign="top">
-      <img src="/pinout.jpg" alt="pinout" width="550" />
+      <img src="/pinout.jpg" alt="pinout" width="550" style="min-width: 150px;" />
     </td>
   </tr>
 </table>
