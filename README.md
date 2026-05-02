@@ -27,4 +27,4 @@ Originally, the lamp had an FMD FT60E122 microcontroller in an SO-14 package wit
 | 13 | test point 1 |
 | 14 | GND |
 
-![pinout](/pinout.jpg)
+<img src="/pinout.jpg" alt="pinout" width="350">
