@@ -1,6 +1,8 @@
 # Temu garden lights hack
 
-I bought 12V-24V outdoor garden lights on Temu. The label said:
+I bought 12V-24V outdoor garden lights on Temu. Originally, they had two wires and a remote controller. I wanted to control them from my smart home, so I modified them to use a custom three-wire bus (0V, data, 24V). 
+
+The label said:
 
 <table border="0">
   <tr>
