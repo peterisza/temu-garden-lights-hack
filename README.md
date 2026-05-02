@@ -71,7 +71,7 @@ Luckily, this mcu is pin-compatible with the Attiny441. These are the steps I di
 <img src="steps.jpg" alt="Steps" />
 
 ### Custom bus physical description
-The custom bus uses three wires: 0V, data, 24V. Logical 0: < 1.5V. Logical 1: 3V-24V. Data format: 10000 baud 8N1. The data line is connected to 24V through a 20mA current limiter in the controller. Max cable length: 200m, number of nodes: 31. To send, every node can pull the data line to zero. Currently, the lamps can only receive but not send. For this reason, their address must be hardcoded during programming like so:
+The custom bus uses three wires: 0V, data, 24V. Logical 0: < 1.5V. Logical 1: 3V-24V. Data format: 10000 baud 8N1. The data line is connected to 24V through a 20mA current limiter in the controller. Max cable length: 200m, number of nodes: 31. To send, each node can pull the data line to zero. Currently, the lamps can only receive but not send. For this reason, their address must be hardcoded during programming like so:
 <code>make program LAMP_ADDRESS=0</code>.
 
 I used a 3x0.75mm² ÖLFLEX® CLASSIC 400 P cable. It has the same diameter as the original two-wire cable, but can be used outdoors unlike the original.
