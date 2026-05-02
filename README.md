@@ -28,7 +28,6 @@ Originally, the lamp had an FMD FT60E122 microcontroller in an SO-14 package wit
 <table border="0">
   <tr>
     <td>
-      <!-- Bal oldali oszlop: A táblázat -->
       <table>
         <thead>
           <tr><th>#</th><th>Function</th></tr>
@@ -52,10 +51,15 @@ Originally, the lamp had an FMD FT60E122 microcontroller in an SO-14 package wit
       </table>
     </td>
     <td valign="top">
-      <!-- Jobb oldali oszlop: A kép -->
       <img src="/pinout.jpg" alt="pinout" width="550" />
     </td>
   </tr>
 </table>
+
+Luckily, this mcu is pin-compatible with the Attiny441. These are the steps I did:
+
+<img src="steps.jpg" alt="Steps" />
+
+The custom bus uses three wires: 0V, data, 24V. Logical 0: < 1.5V. Logical 1: 3V-24V. Data format: 10000baud 8N1. The data line is connected to 24V through a 20mA current limiter in the controller. Max cable length: 200m, number of nodes: 31. To send, every node can pull the data line to zero. Currently, the lamps can only receive but not send. For this reason, their address must be hardcoded during programming.
 
 
