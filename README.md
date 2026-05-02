@@ -4,7 +4,7 @@ I bought 12V-24V outdoor garden lights from Temu. Originally, they had two wires
 
 Disclaimer: All electrical modifications are performed at your own risk.
 
-The label said:
+### Reverse engineering the lamp
 
 <table border="0">
   <tr>
@@ -56,10 +56,26 @@ Originally, the lamp had an FMD FT60E122 microcontroller in an SO-14 package wit
   </tr>
 </table>
 
+### Conversion
+
 Luckily, this mcu is pin-compatible with the Attiny441. These are the steps I did:
 
 <img src="steps.jpg" alt="Steps" />
 
-The custom bus uses three wires: 0V, data, 24V. Logical 0: < 1.5V. Logical 1: 3V-24V. Data format: 10000baud 8N1. The data line is connected to 24V through a 20mA current limiter in the controller. Max cable length: 200m, number of nodes: 31. To send, every node can pull the data line to zero. Currently, the lamps can only receive but not send. For this reason, their address must be hardcoded during programming.
+### Custom bus physical description
+The custom bus uses three wires: 0V, data, 24V. Logical 0: < 1.5V. Logical 1: 3V-24V. Data format: 10000 baud 8N1. The data line is connected to 24V through a 20mA current limiter in the controller. Max cable length: 200m, number of nodes: 31. To send, every node can pull the data line to zero. Currently, the lamps can only receive but not send. For this reason, their address must be hardcoded during programming.
+
+### Data Frame Formats
+
+| Size [byte] | Format A | Size [byte] | Format B |
+| :---: | :--- | :---: | :--- |
+| 1 | 0 < length <= 30 | 1 | length + 32 |
+| 60 | 4x4 bit RGBW | 30 | 2x4 bit RGBW |
+| 2 | fade time in ms | 1 | fade time in ms |
+| 1 | brightness | 1 | brightness |
+| 1 | CRC | 1 | CRC |
+
+There must be a 2ms pause between frames.
+
 
 
