@@ -81,7 +81,7 @@ I used a 3x0.75mm² ÖLFLEX® CLASSIC 400 P cable. This can be used outdoors, is
 There must be a 2ms pause between frames.
 
 ### The controller
-The controller is a DIN rail mounted USB HID device with a cheap STM32C071 mcu. It can be used with a Raspberry Pi + node.js or python without a driver.
+The controller is a DIN rail mounted USB HID device with a cheap STM32C071 mcu. It can be used with a Raspberry Pi + node.js or python without a driver. It can handle two bus lines with 30 lamps each.
 
 <img src="controller.jpg" alt="Steps" />
 
