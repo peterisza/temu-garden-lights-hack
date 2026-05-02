@@ -28,6 +28,12 @@ Disclaimer: All electrical modifications are performed at your own risk.
 Originally, the lamp had an FMD FT60E122 microcontroller in an SO-14 package with the following pinout:
 
 <table border="0">
+  <th>
+    <tr>
+      <td>Pinout</td>
+      <td>Image of the physical board</td>
+    </tr>
+  </th>
   <tr>
     <td>
       <table>
