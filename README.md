@@ -31,7 +31,7 @@ Originally, the lamp had an FMD FT60E122 microcontroller in an SO-14 package wit
   <th>
     <tr>
       <td>Pinout</td>
-      <td>Image of the physical board</td>
+      <td>Board&nbsp;image</td>
     </tr>
   </th>
   <tr>
