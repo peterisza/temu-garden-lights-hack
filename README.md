@@ -81,7 +81,13 @@ I used a 3x0.75mm² ÖLFLEX® CLASSIC 400 P cable. It has the same diameter as t
 There must be a 2ms pause between frames.
 
 ### The controller
-The controller is a DIN rail mounted USB HID device with a cheap STM32C071 mcu. It can be used with a Raspberry Pi + node.js or python without a driver. It can handle two bus lines with 30 lamps each. Build it on your own risk only.
+The controller is a DIN rail mounted USB HID device with a cheap STM32C071 mcu. It can be used with a Raspberry Pi + node.js or python without a driver. It can handle two bus lines with 30 lamps each. Build it or use it at your own risk only.
 
 <img src="controller.jpg" alt="Steps" />
 
+## Licensing
+
+- **Software:** Licensed under the [MIT License](https://opensource.org/license/mit)
+- **Hardware & Documentation:** Licensed under [CERN-OHL-P](https://ohwr.org/project/cernohl/wikis/Documents/CERN-OHL-version-2) / [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/)
+
+Basically: feel free to use, modify, and share this project, but keep the attribution and don't sue me if something breaks.
