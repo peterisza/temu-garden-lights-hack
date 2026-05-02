@@ -4,6 +4,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
+#include <util/delay.h>
 #include <stdint.h>
 
 #define S16_TO_S32_SHIFT(x) ((int32_t)(x) >> 16)
@@ -18,27 +19,67 @@ static const uint8_t bus_address = (uint8_t)(LAMP_ADDRESS);
 
 void io_init() {
 	// --- PWM kimenet (PA5 / TOCC4) ---
-	DDRA |= (1 << PA5);
 
-	DDRA |= (1 << PA2);
-	DDRB |= (1 << PB2); // PB2 kimenet
-	DDRA |= (1 << PA7); // PA7 kimenet
 	DDRA |= (1 << PA3); // PA3 kimenet
-
 	DDRA &= ~(1 << PA4);
+
+	// 1. Lábak kimenetként (PB2, PA7, PA2, PA5)
+	DDRA |= (1 << DDA7) | (1 << DDA5) | (1 << DDA2);
+	DDRB |= (1 << DDB2);
     
 	//PORTA |= (1 << PA4);
 }
 
-/* Timer1 overflow tick @ ~2kHz (PWM base): 0.5ms / tick, tehát 4 tick = 2ms */
+/* Timer1 overflow tick: Fast PWM-nél f_ov = F_CPU / (TOP+1). A PWM_MAX úgy van választva,
+   hogy a korábbi phase-correct időalap (4 tick/ms) megmaradjon. */
 static volatile uint8_t g_t1_ticks;
 static volatile uint8_t g_last_rx_tick;
 
-void pwm_phase_correct_init() {
-	// 1. Lábak kimenetként (PB2, PA7, PA2, PA5)
-	DDRA |= (1 << DDA7) | (1 << DDA5) | (1 << DDA2);
-	DDRB |= (1 << DDB2);
+static void timer0_init_1ms(void) {
+	PRR &= ~(1 << PRTIM0);
 
+	/* CTC: TOP = OCR0A, compare match A interrupt
+	   16 MHz, prescaler 64 => 250 kHz tick => OCR0A=249 => 1 kHz (1 ms) */
+	TCCR0A = (1 << WGM01);
+	TCCR0B = (1 << CS01) | (1 << CS00);
+	OCR0A = 249;
+	TCNT0 = 0;
+	TIFR0 = (1 << OCF0A);
+	TIMSK0 |= (1 << OCIE0A);
+}
+
+/* TCNT0/1/2 = 0 futó órával is rendben; cli a 16 bites TCNT1/2 írás miatt kell (TEMP regiszter).
+ * A TIFR flag bitek ettől nem törlődnek — ha zavar a régi beakadás, azt külön kell 1-gyel írni. */
+void timers_sync_counters_zero(void) {
+	uint8_t sreg = SREG;
+	cli();
+	TCNT0 = 0;
+	TCNT1 = 0;
+	TCNT2 = 0;
+	SREG = sreg;
+}
+
+/* Fast PWM TOP = PWM_MAX => periódus (tick) = (PWM_MAX+1) CPU ciklus prescaler=1-nél */
+#define PWM_MAX 1000U
+#define PWM_DITHERING_BITS 3
+#define PWM_DITHERING_FACTOR (1 << PWM_DITHERING_BITS)
+#define UART_SILENCE_TICKS_2MS (4U)
+
+volatile uint16_t red_pwm = 0, blue_pwm = 0, green_pwm = 0, white_pwm = 0;
+
+void set_pwm_registers() {
+	OCR1A = red_pwm;
+	OCR1B = white_pwm;
+	OCR2A = blue_pwm;
+	OCR2B = green_pwm;
+	TCCR1A = (TCCR1A & (uint8_t)~((1 << COM1A1) | (1 << COM1B1)))
+		| (red_pwm != 0 ? (1 << COM1A1) : 0) | (white_pwm != 0 ? (1 << COM1B1) : 0);
+	TCCR2A = (TCCR2A & (uint8_t)~((1 << COM2A1) | (1 << COM2B1)))
+		| (blue_pwm != 0 ? (1 << COM2A1) : 0) | (green_pwm != 0 ? (1 << COM2B1) : 0);
+}
+
+
+void pwm_init() {
 	// 2. TOCP Pin Mux beállítása (Timer kimenetek lábakhoz rendelése)
 	// TOCC7:OC1A, TOCC6:OC1B, TOCC4:OC2B, TOCC1:OC2A
 	TOCPMSA1 = (0<<TOCC7S1) | (1<<TOCC7S0) | (0<<TOCC6S1) | (1<<TOCC6S0) | (1<<TOCC4S1) | (0<<TOCC4S0);
@@ -47,25 +88,22 @@ void pwm_phase_correct_init() {
 	// TOCC kimenetek engedélyezése
 	TOCPMCOE = (1<<TOCC7OE) | (1<<TOCC6OE) | (1<<TOCC4OE) | (1<<TOCC1OE);
 
-	// 3. Timer1 beállítása (PB2 és PA7) - Mode 10: Phase Correct, TOP = ICR1
+	// 3. Timer1 beállítása (PB2 és PA7) - Fast PWM, Mode 14, TOP = ICR1
 	TCCR1A = (1 << COM1A1) | (1 << COM1B1) | (1 << WGM11);
-	TCCR1B = (1 << WGM13) | (1 << CS10); 
-	ICR1 = 8000; 
-	TIMSK1 |= (1 << TOIE1); /* időalap: TIMER1_OVF_vect @ ~2kHz */
+	TCCR1B = (1 << WGM13) | (1 << WGM12) | (1 << CS10);
+	ICR1 = PWM_MAX-1;
+	TIMSK1 |= (1 << TOIE1); /* időalap: TIMER1_OVF_vect */
 
-	// 4. Timer2 beállítása (PA2 és PA5) - Mode 10: Phase Correct, TOP = ICR2
-	TCCR2A = (1 << COM2A1) | (1 << COM2B1) | (1 << WGM21);
-	TCCR2B = (1 << WGM23) | (1 << CS20);
-	ICR2 = 8000; 
+	// 4. Timer2 beállítása (PA2 és PA5) - Fast PWM, TOP = ICR2 (WGM2[2:0]=111)
+	TCCR2A = (1 << COM2A1) | (1 << COM2B1) | (1 << WGM21) | (1 << WGM20);
+	TCCR2B = (1 << WGM22) | (1 << CS20);
+	ICR2 = PWM_MAX-1;
 
 	// 5. Példa kitöltési tényezők (0 - 500 tartományban)
-	OCR1A = 0; // red
-	OCR1B = 0; // white
-	OCR2A = 0; // blue
-	OCR2B = 0; // green
+	set_pwm_registers();
 }
 
-#define UART_SILENCE_TICKS_2MS 4U
+
 
 
 #define UART_BUFFER_SIZE 70
@@ -119,53 +157,73 @@ const uint16_t gamma_lut[16] PROGMEM = {
  5013, 5979, 7037, 8191
 };
 
-volatile int32_t red = 0, blue = 0, green = 0, white = 0, brightness = 0;
-volatile int32_t red_target = 0, blue_target = 0, green_target = 0, white_target = 0, brightness_target = 0;
-volatile int32_t red_step = 0, blue_step = 0, green_step = 0, white_step = 0, brightness_step = 0;
+/* index: 0=R, 1=B, 2=G, 3=W — megegyezik a set_pwm_registers / OCR sorrenddel */
+#define NUM_CHANNELS 4
 
+volatile int32_t channels[NUM_CHANNELS];
+volatile int32_t targets[NUM_CHANNELS];
+volatile int32_t step[NUM_CHANNELS];
+volatile uint8_t errors[NUM_CHANNELS];
 
-#define RED_MAX 1274 // 1274
-#define BLUE_MAX 6240 // 6240
-#define GREEN_MAX 6240 // 6240
-#define WHITE_MAX 6240
+volatile int32_t brightness = 0;
+volatile int32_t brightness_target = 0;
+volatile int32_t brightness_step = 0;
+
+static const uint16_t channel_max[NUM_CHANNELS] = {
+	160U,
+	780U,
+	780U,
+	780U,
+};
 
 void update_pwm(void) {
-	uint32_t r = red >> 16;
-	uint32_t b = blue >> 16;
-	uint32_t g = green >> 16;
-	uint32_t w = white >> 16;
-	uint32_t sum = r + g + b + 3*w;
+	uint32_t c[NUM_CHANNELS];
+	for (uint8_t i = 0; i < NUM_CHANNELS; i++) {
+		c[i] = (uint32_t)(channels[i] >> 16);
+	}
+	uint32_t r = c[0], b = c[1], g = c[2], w = c[3];
+	uint32_t sum = r + g + b + 3 * w;
 	uint32_t sum_target = brightness >> 8;
 	sum_target *= sum_target;
 	sum_target >>= 16;
-	
-	if(sum == 0)
+
+	if (sum == 0) {
 		sum = 1;
-	
-	uint32_t red_normalized = r * sum_target / sum;
-	uint32_t blue_normalized = b * sum_target / sum;
-	uint32_t green_normalized = g * sum_target / sum;
-	uint32_t white_normalized = w * sum_target / sum;
-	
-	uint16_t red_pwm = (red_normalized * RED_MAX) >> 13;
-	uint16_t blue_pwm = (blue_normalized * BLUE_MAX) >> 13;
-	uint16_t green_pwm = (green_normalized * GREEN_MAX) >> 13;
-	uint16_t white_pwm = (white_normalized * WHITE_MAX) >> 13;
-	
-	if(red_pwm > RED_MAX) red_pwm = RED_MAX;
-	if(blue_pwm > BLUE_MAX) blue_pwm = BLUE_MAX;
-	if(green_pwm > GREEN_MAX) green_pwm = GREEN_MAX;
-	if(white_pwm > WHITE_MAX) white_pwm = WHITE_MAX;
-	
-	OCR1A = red_pwm;
-	OCR1B = white_pwm;
-	OCR2A = blue_pwm;
-	OCR2B = green_pwm;
+	}
+
+	uint32_t norm[NUM_CHANNELS];
+	norm[0] = r * sum_target / sum;
+	norm[1] = b * sum_target / sum;
+	norm[2] = g * sum_target / sum;
+	norm[3] = w * sum_target / sum;
+
+	uint16_t pwm[NUM_CHANNELS];
+	for (uint8_t i = 0; i < NUM_CHANNELS; i++) {
+		pwm[i] = (uint16_t)((norm[i] * channel_max[i]) >> (13 - PWM_DITHERING_BITS));
+		errors[i] += (uint8_t)(pwm[i] & (PWM_DITHERING_FACTOR - 1));
+		pwm[i] >>= PWM_DITHERING_BITS;
+		if (errors[i] >= PWM_DITHERING_FACTOR) {
+			pwm[i]++;
+			errors[i] -= PWM_DITHERING_FACTOR;
+		}
+		if (pwm[i] > channel_max[i]) {
+			pwm[i] = channel_max[i];
+		}
+	}
+
+	red_pwm = pwm[0];
+	blue_pwm = pwm[1];
+	green_pwm = pwm[2];
+	white_pwm = pwm[3];
 }
 
 volatile int16_t color_transition_counter = 0;
 
 ISR(TIMER1_OVF_vect) {
+	set_pwm_registers();
+}
+
+ISR(TIMER0_COMPA_vect) {
 	g_t1_ticks++;
 	/*int16_t phase = color_transition_counter_max - color_transition_counter;
 	if(color_transition_counter < phase)
@@ -177,23 +235,22 @@ ISR(TIMER1_OVF_vect) {
 		return;
 	soft_transition_counter = 0;*/
 
-	if(color_transition_counter > 0) {
+	if (color_transition_counter > 0) {
 		color_transition_counter--;
-		red += red_step;
-		blue += blue_step;
-		green += green_step;
-		white += white_step;
+		for (uint8_t i = 0; i < NUM_CHANNELS; i++) {
+			channels[i] += step[i];
+		}
 		brightness += brightness_step;
-		if(color_transition_counter == 0) {
-			red = red_target;
-			blue = blue_target;
-			green = green_target;
-			white = white_target;
+		if (color_transition_counter == 0) {
+			for (uint8_t i = 0; i < NUM_CHANNELS; i++) {
+				channels[i] = targets[i];
+			}
 			brightness = brightness_target;
 		}
-		update_pwm();
 	}
+	update_pwm();
 }
+
 
 uint16_t sqrt32(uint32_t n) {
     uint32_t root = 0;
@@ -239,31 +296,29 @@ void set_color_target(uint8_t r, uint8_t g, uint8_t b, uint8_t w, uint8_t bright
 	uint32_t sum = red_raw + blue_raw + green_raw + 3 * white_raw;
 	uint32_t norm = (uint32_t)sqrt32(sum << 16) * brightness_factor;
 
-	red_target = red_raw << 16;
-	blue_target = blue_raw << 16;
-	green_target = green_raw << 16;
-	white_target = white_raw << 16;
-	brightness_target = norm;
+	targets[0] = (int32_t)(red_raw << 16);
+	targets[1] = (int32_t)(blue_raw << 16);
+	targets[2] = (int32_t)(green_raw << 16);
+	targets[3] = (int32_t)(white_raw << 16);
+	brightness_target = (int32_t)norm;
 
-	red_step = (red_target - red);
-	blue_step = (blue_target - blue);
-	green_step = (green_target - green);
-	white_step = (white_target - white);
-	brightness_step = (brightness_target - brightness);
+	step[0] = targets[0] - channels[0];
+	step[1] = targets[1] - channels[1];
+	step[2] = targets[2] - channels[2];
+	step[3] = targets[3] - channels[3];
+	brightness_step = brightness_target - brightness;
 
-	if(time > 2) {
+	if (time > 2) {
 		int32_t time_half = time / 2;
 		int32_t time_32 = time;
-		red_step = (red_step + time_half) / time_32;
-		blue_step = (blue_step + time_half) / time_32;
-		green_step = (green_step + time_half) / time_32;
-		white_step = (white_step + time_half) / time_32;
+		for (uint8_t i = 0; i < NUM_CHANNELS; i++) {
+			step[i] = (step[i] + time_half) / time_32;
+		}
 		brightness_step = (brightness_step + time_half) / time_32;
 	} else {
-		red = red_target;
-		blue = blue_target;
-		green = green_target;
-		white = white_target;
+		for (uint8_t i = 0; i < NUM_CHANNELS; i++) {
+			channels[i] = targets[i];
+		}
 		brightness = brightness_target;
 		update_pwm();
 	}
@@ -324,11 +379,14 @@ void uart_process_buffer(void) {
 
 int main(void) {
 	io_init();
-	pwm_phase_correct_init();
-	uart_init();
-	sei();
 
-	update_pwm();
+	_delay_us(2*LAMP_ADDRESS);
+
+	pwm_init();
+	timer0_init_1ms();
+	uart_init();
+	timers_sync_counters_zero();
+	sei();
 
 	while (1) {
 		/* UART polling: ha van bájt, tedd pufferbe és frissítsd a last_rx időt */

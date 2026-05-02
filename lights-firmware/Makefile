@@ -17,12 +17,14 @@ OBJCOPY = avr-objcopy
 AVRDUDE = avrdude -P /dev/ttyUSB0
 
 # --- Fordítási jelzők ---
-CFLAGS = -mmcu=$(MCU) -DF_CPU=$(F_CPU) -DLAMP_ADDRESS=$(LAMP_ADDRESS) -Wall -Os
+CFLAGS = -mmcu=$(MCU) -DF_CPU=$(F_CPU) -DLAMP_ADDRESS=$(LAMP_ADDRESS) -Wall -O2
+# Linkeléskor kiírja a memóriarégiók használatát (túlcsordulásnál is: Used vs Region Size).
+LDFLAGS = -Wl,--print-memory-usage
 
 all: $(TARGET).hex
 
 $(TARGET).elf: $(SRCS)
-	$(CC) $(CFLAGS) -o $(TARGET).elf $(SRCS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(TARGET).elf $(SRCS)
 
 $(TARGET).hex: $(TARGET).elf
 	$(OBJCOPY) -j .text -j .data -O ihex $(TARGET).elf $(TARGET).hex
