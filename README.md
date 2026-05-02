@@ -2,29 +2,56 @@
 
 I bought 12V-24V outdoor garden lights on Temu. The label said:
 
-- Product Name: Low Voltage LED Lights
-- Model: CTY-10W
-- Serial Number / Seri Numarasi : RGDC50245
-- Manufacturer: Shenzhen Changtaiying Technology Co., Ltd
-- Address: No. 4 Yintian Road, Bao'an District, Shenzhen City, Guangdong province, China.
+<table border="0">
+  <tr>
+    <td valign="top">
+      <img src="label.jpg" alt="Product Label" width="300" />
+    </td>
+    <td valign="top">
+      <ul>
+        <li><strong>Product Name:</strong> Low Voltage LED Lights</li>
+        <li><strong>Model:</strong> CTY-10W</li>
+        <li><strong>Serial Number / Seri Numarasi:</strong> RGDC50245</li>
+        <li><strong>Manufacturer:</strong> Shenzhen Changtaiying Technology Co., Ltd</li>
+        <li><strong>Address:</strong> No. 4 Yintian Road, Bao'an District, Shenzhen City, Guangdong province, China.</li>
+      </ul>
+    </td>
+  </tr>
+</table>
 
 Originally, the lamp had an FMD FT60E122 microcontroller in an SO-14 package with the following pinout:
 
-| # | Function |
-| :--- | :--- |
-| 1 | VDD (5V) |
-| 2 | Crystal1 (16 MHz) |
-| 3 | Crystal2 |
-| 4 | radio recv |
-| 5 | Red PWM 62.8μs (10μs max) |
-| 6 | White PWM 62.8μs (49.2μs max) |
-| 7 | not connected |
-| 8 | Green PWM 62.8μs (49.2μs max) |
-| 9 | not connected |
-| 10 | not connected |
-| 11 | Blue PWM 62.8μs (49.2μs max) |
-| 12 | test point 2 |
-| 13 | test point 1 |
-| 14 | GND |
+<table border="0">
+  <tr>
+    <td>
+      <!-- Bal oldali oszlop: A táblázat -->
+      <table>
+        <thead>
+          <tr><th>#</th><th>Function</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>VDD (5V)</td></tr>
+          <tr><td>2</td><td>Crystal1 (16 MHz)</td></tr>
+          <tr><td>3</td><td>Crystal2</td></tr>
+          <tr><td>4</td><td>radio recv</td></tr>
+          <tr><td>5</td><td>Red PWM 62.8μs (10μs max)</td></tr>
+          <tr><td>6</td><td>White PWM 62.8μs (49.2μs max)</td></tr>
+          <tr><td>7</td><td>not connected</td></tr>
+          <tr><td>8</td><td>Green PWM 62.8μs (49.2μs max)</td></tr>
+          <tr><td>9</td><td>not connected</td></tr>
+          <tr><td>10</td><td>not connected</td></tr>
+          <tr><td>11</td><td>Blue PWM 62.8μs (49.2μs max)</td></tr>
+          <tr><td>12</td><td>test point 2</td></tr>
+          <tr><td>13</td><td>test point 1</td></tr>
+          <tr><td>14</td><td>GND</td></tr>
+        </tbody>
+      </table>
+    </td>
+    <td valign="top">
+      <!-- Jobb oldali oszlop: A kép -->
+      <img src="/pinout.jpg" alt="pinout" width="550" />
+    </td>
+  </tr>
+</table>
 
-<img src="/pinout.jpg" alt="pinout" width="350">
+
