@@ -74,7 +74,7 @@ I used a 3x0.75mm² ÖLFLEX® CLASSIC 400 P cable. It has the same diameter as t
 | Size [byte] | Format A | Size [byte] | Format B |
 | :---: | :--- | :---: | :--- |
 | 1 | 0 < length <= 30 | 1 | length + 32 |
-| 60 | 4x4 bit RGBW | 30 | 2x4 bit RGBW |
+| max 60 | 4x4 bit RGBW | max 30 | 2x4 bit RGBW |
 | 2 | fade time in ms | 2 | fade time in ms |
 | 1 | brightness | 1 | brightness |
 | 1 | CRC | 1 | CRC |
