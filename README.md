@@ -4,6 +4,8 @@ I bought 12V-24V outdoor garden lights from Temu. Originally, they had two wires
 
 Disclaimer: All electrical modifications are performed at your own risk.
 
+<img src="mod.jpg" alt="Modification" width="" />
+
 ### Reverse engineering the lamp
 
 <table border="0">
@@ -79,7 +81,7 @@ I used a 3x0.75mm² ÖLFLEX® CLASSIC 400 P cable. This can be used outdoors, is
 There must be a 2ms pause between frames.
 
 ### The controller
-The controller is a DIN rail mounted USB HID device with a cheap STM32C071 mcu. A Raspberry Pi can use it easily with node.js or python, without a driver.
+The controller is a DIN rail mounted USB HID device with a cheap STM32C071 mcu. It can be used with a Raspberry Pi + node.js or python without a driver.
 
 <img src="controller.jpg" alt="Steps" />
 
