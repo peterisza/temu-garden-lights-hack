@@ -74,7 +74,7 @@ Luckily, this mcu is pin-compatible with the Attiny441. These are the steps I di
 The custom bus uses three wires: 0V, data, 24V. Logical 0: < 1.5V. Logical 1: 3V-24V. Data format: 10000 baud 8N1. The data line is connected to 24V through a 20mA current limiter in the controller. Max cable length: 200m, number of nodes: 31. To send, each node can pull the data line to zero. Currently, the lamps can only receive but not send. For this reason, their address must be hardcoded during programming like so:
 <code>make program LAMP_ADDRESS=0</code>.
 
-I used a 3x0.75mm² ÖLFLEX® CLASSIC 400 P cable. It has the same diameter as the original two-wire cable, but can be used outdoors unlike the original.
+I used a 3x0.75mm² ÖLFLEX® CLASSIC 400 P cable. It has the same diameter as the original two-wire cable, but is actually certified for outdoor use unlike the original.
 
 ### Data Frame Formats
 | Size [byte] | Format A | Size [byte] | Format B |
@@ -88,7 +88,9 @@ I used a 3x0.75mm² ÖLFLEX® CLASSIC 400 P cable. It has the same diameter as t
 There must be a 2ms pause between frames.
 
 ### The controller
-The controller is a DIN rail mounted USB HID device with a cheap STM32C071 mcu. It can be used with a Raspberry Pi + node.js or python without a driver. It can handle two bus lines with 30 lamps each. Build/use it at your own risk only.
+The controller is a DIN rail mounted USB HID device with a cheap STM32C071 mcu. It can handle two bus lines with 30 lamps each. Build/use it at your own risk only.
+
+My smart home server is already a Raspberry Pi which has USB, so I can just connect it. If you want standalone operation or wireless, you should build an ESP32-based controller instead of this STM32-based one.
 
 <img src="controller.jpg" alt="Steps" />
 
