@@ -87,6 +87,10 @@ I used a 3x0.75mm² ÖLFLEX® CLASSIC 400 P cable. It has the same diameter as t
 
 There must be a 2ms pause between frames.
 
+### Colors
+
+The firmware uses a 16kHz PWM with sigma-delta dithering. It can do gamma-correct interpolation, so the perceived brightness is linear between transitions (premium fade effect 🤩).
+
 ### The controller
 The controller is a DIN rail mounted USB HID device with a cheap STM32C071 mcu. It can handle two bus lines with 30 lamps each. Build/use it at your own risk only.
 
