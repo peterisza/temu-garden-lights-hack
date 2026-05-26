@@ -31,7 +31,8 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-void addDataToUartBuffer(unsigned char* data, int length);
+#include "verified_uart.h"
+extern VerifiedUart g_uart2;
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

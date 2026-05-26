@@ -145,9 +145,9 @@ VOID USBD_Custom_HID_SetReport(struct UX_SLAVE_CLASS_HID_STRUCT *hid_instance)
 	UX_DEVICE_CLASS_HID_RECEIVED_EVENT hid_event;
 	while(ux_device_class_hid_receiver_event_get(hid_instance, &hid_event) == UX_SUCCESS)
 	{
-	  // Ha megjött a csomag, felkapcsoljuk a LED-et
-	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_6);
-	  addDataToUartBuffer(hid_event.ux_device_class_hid_received_event_data, hid_event.ux_device_class_hid_received_event_length);
+	  VerifiedUart_SubmitFrame(&g_uart2,
+	      (const uint8_t *)hid_event.ux_device_class_hid_received_event_data,
+	      (uint16_t)hid_event.ux_device_class_hid_received_event_length);
 
 	  ux_device_class_hid_receiver_event_free(hid_instance);
 	}

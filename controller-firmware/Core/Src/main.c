@@ -22,7 +22,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "verified_uart.h"
+#include "status_leds.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,7 +49,7 @@ UART_HandleTypeDef huart2;
 PCD_HandleTypeDef hpcd_USB_DRD_FS;
 
 /* USER CODE BEGIN PV */
-
+VerifiedUart g_uart2;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -63,22 +64,6 @@ static void MX_USB_PCD_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-#define UART_BUFFER_MAX_SIZE 128
-volatile char uart_buffer[UART_BUFFER_MAX_SIZE];
-volatile int uart_buffer_size = 0;
-volatile int uart_buffer_cursor = 0;
-
-void addDataToUartBuffer(unsigned char* data, int length)
-{
-	int i;
-	if(length > UART_BUFFER_MAX_SIZE)
-		length = UART_BUFFER_MAX_SIZE;
-	for(i = 0; i < length; ++i) {
-		uart_buffer[i] = data[i];
-	}
-	uart_buffer_size = length;
-	uart_buffer_cursor = 0;
-}
 
 /* USER CODE END 0 */
 
@@ -123,6 +108,9 @@ int main(void)
   /* USER CODE BEGIN 2 */
   MX_USB_PCD_Init();
   HAL_PCD_DevConnect(&hpcd_USB_DRD_FS); // Ez rántja meg a vonalat a PC-nek
+  VerifiedUart_Init(&g_uart2, &huart2);
+  VerifiedUart_Start(&g_uart2);
+  StatusLeds_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -130,18 +118,11 @@ int main(void)
   while (1)
   {
 	  ux_device_stack_tasks_run();
-	  static uint32_t last_tick = 0;
-	  if (HAL_GetTick() - last_tick > 500)
-	  {
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_7);
-		last_tick = HAL_GetTick();
+	  VerifiedUart_Process(&g_uart2);
+	  if (VerifiedUart_ConsumeFrameDropEvent(&g_uart2)) {
+		  StatusLeds_PulseRed(1000U);
 	  }
-	  if(uart_buffer_cursor < uart_buffer_size && __HAL_UART_GET_FLAG(&huart2, UART_FLAG_TXE))
-	  {
-		  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_7);
-		  huart2.Instance->TDR = uart_buffer[uart_buffer_cursor];
-		  uart_buffer_cursor++;
-	  }
+	  StatusLeds_Update(false, VerifiedUart_IsFault(&g_uart2));
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
